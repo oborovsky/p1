@@ -1,10 +1,12 @@
-deff('y=U(x,t)','y=exp(t+x)');
-deff('y=X0(t)','y=sin(%pi*t/2)');
-deff('y=X1(t)','y=1+sin(%pi*t/2)');
-deff('y=U0(x)','y=exp(x)');
-deff('y=Ul(t)','y=exp(t+ sin(%pi*t/2))');
-deff('y=Ur(t)','y=exp(t+sin(%pi*t/2)+1)');
-
+deff('y=U(x,t)','y=t+ exp(10*t+x)');
+//deff('y=U(x,t)','y=x.^2+x.*sin(t)');
+deff('y=X0(t)','y=0');
+deff('y=X1(t)','y=1');
+deff('y=U0(x)','y=U(x,0)');
+deff('y=Ul(t)','y=U(X0(t),t)');
+deff('y=Ur(t)','y=U(X1(t),t)');
+//deff('y=F(x,t)','y=x.^2+x.*cos(t) -2');
+deff('y=F(x,t)','y=1 + 9*exp(10*t+x)');
 function x = Gauss(A,B)
     C = [A B];
     [n,m] = size(C);
@@ -100,18 +102,17 @@ function [m, d,AA,BB] = makeLinearSystem (u, t,ii,X)
         AA = A;
         BB = B;
 //        aa = A\B;
-//        aa = [-0.7751498;2.5866087;-0.8114590;0.0816956;0.3729179;0.5453865];
-//        if i==2 then
-//            disp("A=");
-//            disp(A);
-//            disp(B);
-//            disp(B);
-//            disp(aa);
-//        end
         a(i) = aa(1);
         b(i) = aa(2);
-        c(i) = aa(3);    
-        dd(i) = aa(6)*u(i+1) + aa(5)*u(i) + aa(4)*u(i-1);
+        c(i) = aa(3);
+        A1 = aa(1)*f1 + aa(2)*f2 + aa(3)*f3;
+        A2 = aa(1)*f1^2 + aa(2)*f2^2 + aa(3)*f3^2;
+        k1 = (A1 - A2 + r/2 + f1*(f1-g3)/2)/(g1*(g3-g1));
+        k3 = (A1 - A2 + r/2 + f1*(f1-g1)/2)/(g3*(g1-g3));
+        k2 = 1/2 - k1 - k3;
+       // ff = F(xi + f2,tn1)/2 + k1*F(xi+g1,tn) + k2*F(xi+g2,tn) + k3*F(xi+g3,tn);    
+       ff = F(xi,tn) + t*90*exp(10*tn+xi)/2 + A1*9*exp(10*tn+xi)+(A2+r/2)*9*exp(10*tn+xi)/2;
+        dd(i) = aa(6)*u(i+1) + aa(5)*u(i) + aa(4)*u(i-1) + t*ff;
     end
 
     a(s) = 0;
@@ -143,10 +144,10 @@ function [e,u,y,AA,BB] = makeApp (T, X)
     end
     e = y - u;
 endfunction
-N = 5;
+N = 2;
 [e,u,y,AA,BB] = makeApp(N^2, N);
 ee(1) = max(abs(e));
-for i = 2:3
+for i = 2:2
     N = 2*N;
     X = N;
     T = X^2;

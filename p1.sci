@@ -1,13 +1,13 @@
-deff('y=U(x,t)','y=exp(-t).*sin(x)');
+deff('y=U(x,t)','y=exp(x+2*t)');
 //deff('y=U(x,t)','y=x.^2+x.*sin(t)');
 //deff('y=U(x,t)','y=exp(t+x)');
-deff('y=X0(t)','y=t');
-deff('y=X1(t)','y=t+1');
+deff('y=X0(t)','y=0');
+deff('y=X1(t)','y=1');
 deff('y=U0(x)','y=U(x,0)');
 deff('y=Ul(t)','y=U(X0(t),t)');
 deff('y=Ur(t)','y=U(X1(t),t)');
 //deff('y=F(x,t)','y=x.*cos(t) -2');
-deff('y=F(x,t)','y=0');
+deff('y=F(x,t)','y=exp(x+2*t)');
 function x = Gauss(A,B)
     C = [A B];
     [n,m] = size(C);
@@ -86,37 +86,48 @@ function [m, d,AA,BB] = makeLinearSystem (u, t,ii,X)
     c = [0];
     dd = Ul(tn1);
     s = length(u);
-    r = 2*t;
+//    r = 2*t;
+    a1 = -t/(2*h1^2) + 1/12;
+    a3 = a1;
+    a2 = t/h1^2 + 5/6;
+    b1 = t/(2*h0^2) + 1/12;
+    b3 = b1;
+    b2 = -t/h0^2 + 5/6;
+    k1 = 1/12;
+    k3 = k1;
+    k2 = 1/3;
     for i=2:s-1
         xi = X0(tn) + (i-1)*h0;
         x1i = X0(tn1) + (i-1)*h1;
-        f2 = x1i - xi;
-        f1 = f2 - h1;
-        f3 = f2 + h1;
-        g2 = 0;
-        g1 = g2-h0;
-        g3 = g2+h0;
-        A = [1,1,1,0,0,0; 0,0,0,1,1,1;f1,f2,f3,-g1,-g2,-g3;f1^2,f2^2,f3^2,-g1^2,-g2^2,-g3^2;f1^3+3*r*f1,f2^3+3*r*f2,f3^3+3*r*f3,-g1^3,-g2^3,-g3^3;f1^4+6*r*f1^2,f2^4+6*r*f2^2,f3^4+6*r*f3^2,-g1^4,-g2^4,-g3^4];
-        B = [1;1;0;-r;0;-3*r^2]; 
+//        f2 = x1i - xi;
+//        f1 = f2 - h1;
+//        f3 = f2 + h1;
+//        g2 = 0;
+//        g1 = g2-h0;
+//        g3 = g2+h0;
+//        A = [1,1,1,0,0,0; 0,0,0,1,1,1;f1,f2,f3,-g1,-g2,-g3;f1^2,f2^2,f3^2,-g1^2,-g2^2,-g3^2;f1^3+3*r*f1,f2^3+3*r*f2,f3^3+3*r*f3,-g1^3,-g2^3,-g3^3;f1^4+6*r*f1^2,f2^4+6*r*f2^2,f3^4+6*r*f3^2,-g1^4,-g2^4,-g3^4];
+//        B = [1;1;0;-r;0;-3*r^2]; 
         
 //        aa = Gauss(A,B);
-        AA = A;
-        BB = B;
-        aa = A\B;
-        a(i) = aa(1);
-        b(i) = aa(2);
-        c(i) = aa(3);
-        A1 = aa(1)*f1 + aa(2)*f2 + aa(3)*f3;
-        A2 = aa(1)*f1^2 + aa(2)*f2^2 + aa(3)*f3^2;
+//        AA = A;
+//        BB = B;
+//        aa = A\B
+        a(i) = a1;// aa(1);
+        b(i) = a2 ;//aa(2);
+        c(i) = a3 ; //aa(3);
+//        A1 = aa(1)*f1 + aa(2)*f2 + aa(3)*f3;
+//        A2 = aa(1)*f1^2 + aa(2)*f2^2 + aa(3)*f3^2;
 //        k1 = (A1 - A2 + r/2 + f2*(f2-g3)/2)/(g1*(g3-g1));
-          k1 = (A2 + r/2 - f2^2/2 + (f2/2-A1)*g3)/(g1*(g1-g3));
+//          k1 = (A2 + r/2 - f2^2/2 + (f2/2-A1)*g3)/(g1*(g1-g3))
 //        k3 = (A1 - A2 + r/2 + f2*(f2-g1)/2)/(g3*(g1-g3));
-          k3 = (A2 + r/2 - f2^2/2 + (f2/2-A1)*g1)/(g3*(g3-g1));
-        k2 = 1/2 - k1 - k3;
-        ff = F(xi + f2,tn1)/2 + k1*F(xi+g1,tn) + k2*F(xi+g2,tn) + k3*F(xi+g3,tn);    
+//          k3 = (A2 + r/2 - f2^2/2 + (f2/2-A1)*g1)/(g3*(g3-g1))
+//        k2 = 1/2 - k1 - k3
+//        ff = F(xi + f2,tn1)/2 + k1*F(xi+g1,tn) + k2*F(xi+g2,tn) + k3*F(xi+g3,tn);
+        ff = F(xi + h1,tn1)/2 + k1*F(xi - h0,tn) + k2*F(xi,tn) + k3*F(xi+h0,tn);
 //        disp(ff);
 //       ff = F(xi,tn) + t*90*exp(10*tn+xi)/2 + A1*9*exp(10*tn+xi)+(A2+r/2)*9*exp(10*tn+xi)/2;
-        dd(i) = aa(6)*u(i+1) + aa(5)*u(i) + aa(4)*u(i-1) + t*ff;
+//        dd(i) = aa(6)*u(i+1) + aa(5)*u(i) + aa(4)*u(i-1) + t*ff;
+           dd(i) = b3*u(i+1) + b2*u(i) + b1*u(i-1) + t*ff;
     end
 
     a(s) = 0;
@@ -151,12 +162,12 @@ endfunction
 N = 5;
 [e,u,y,AA,BB] = makeApp(N^2, N);
 ee(1) = max(abs(e));
-//for i = 2:3
-//    N = 2*N;
-//    X = N;
-//    T = X^2;
-//    [e,u,y,AA,BB] = makeApp(T, X);
-//    ee(i) = max(abs(e));
-//    printf("ee(%d)=%1.15f,ee(%d)=%1.15f, p = %1.15f\n",i-1,ee(i-1),i,ee(i), abs(log2(ee(i-1)/ee(i))));
-//end
+for i = 2:2
+    N = 2*N;
+    X = N;
+    T = X^2;
+    [e,u,y,AA,BB] = makeApp(T, X);
+    ee(i) = max(abs(e));
+    printf("ee(%d)=%1.15f,ee(%d)=%1.15f, p = %1.15f\n",i-1,ee(i-1),i,ee(i), abs(log2(ee(i-1)/ee(i))));
+end
 
